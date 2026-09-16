@@ -1,0 +1,21 @@
+# --- Artefactos de colcon (jamás se versionan) ---
+build/
+install/
+log/
+.colcon_install_layout
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# --- Entorno local por persona ---
+.env
+*.local
+
+# --- Editores ---
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
