@@ -1,0 +1,72 @@
+name: ros2-demo
+
+services:
+  # ── Entorno de desarrollo interactivo ────────────────
+  dev:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+      args:
+        ROS_DISTRO: ${ROS_DISTRO:-jazzy}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+    image: ros2-demo:dev
+    container_name: ros2-demo-dev
+    init: true
+    stdin_open: true
+    tty: true
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+      RCUTILS_COLORIZED_OUTPUT: "1"
+    volumes:
+      - ./:/workspaces/ros2_demo
+      - ros2demo-build:/workspaces/ros2_demo/build
+      - ros2demo-install:/workspaces/ros2_demo/install
+      - ros2demo-log:/workspaces/ros2_demo/log
+    networks: [rosnet]
+    command: ["bash"]
+
+  # ── Nodos "de producción", desde la imagen runtime ───
+  talker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: runtime
+      args:
+        ROS_DISTRO: ${ROS_DISTRO:-jazzy}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+    image: ros2-demo:runtime
+    container_name: ros2-demo-talker
+    init: true
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+      RCUTILS_COLORIZED_OUTPUT: "1"
+    networks: [rosnet]
+    command: ["ros2", "run", "demo_chatter", "talker"]
+    restart: unless-stopped
+
+  listener:
+    image: ros2-demo:runtime
+    container_name: ros2-demo-listener
+    depends_on: [talker]
+    init: true
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+      RCUTILS_COLORIZED_OUTPUT: "1"
+    networks: [rosnet]
+    command: ["ros2", "run", "demo_chatter", "listener"]
+    restart: unless-stopped
+
+volumes:
+  ros2demo-build:
+    external: true
+  ros2demo-install:
+    external: true
+  ros2demo-log:
+    external: true
+
+networks:
+  rosnet:
+    driver: bridge
