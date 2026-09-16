@@ -66,7 +66,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER ${USERNAME}
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc \
- && echo "[ -f ${WS}/install/setup.bash ] && source ${WS}/install/setup.bash" >> ~/.bashrc
+ && echo "[ -f ${WS}/install/setup.bash ] && source ${WS}/install/setup.bash" >> ~/.bashrc \
+ && echo 'export PS1="🐳 \[\e[36m\]\u@ros2-demo\[\e[0m\]:\w\$ "' >> ~/.bashrc
 
 WORKDIR ${WS}
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
